@@ -1,20 +1,24 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import Redis from 'ioredis';
-import { REDIS_PROVIDER_NAME } from 'src/redis/redis.module';
+import { signJwt } from '~/jwt';
+import { REDIS_PROVIDER_NAME } from '~/redis/redis.module';
 import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
-type OtpPayload = {
-  email: string;
-  otp: string;
-  id: string;
-};
 @Injectable()
 export class OtpService {
   constructor(@Inject(REDIS_PROVIDER_NAME) private readonly redis: Redis) {}
 
-  private OTP_TTL = 300;
-  private ATTEMPT_TTL = 600;
-  private MAX_ATTEMPTS = 5;
+  static readonly OTP_TTL = 300;
+  static readonly ATTEMPT_TTL = 600;
+  static readonly MAX_ATTEMPTS = 5;
 
   private generateOtp(
     length = 10,
@@ -34,17 +38,17 @@ export class OtpService {
     return `otp_attempts:${identifier}`;
   }
 
-  async send({ emailId }: SendOtpDto) {
-    const attemptKey = this.getAttemptKey(emailId);
-    const otpKey = this.getOtpKey(emailId);
+  async send({ identifier }: SendOtpDto) {
+    const attemptKey = this.getAttemptKey(identifier);
+    const otpKey = this.getOtpKey(identifier);
 
     const attempts = await this.redis.incr(attemptKey);
 
     if (attempts === 1) {
-      await this.redis.expire(attemptKey, this.ATTEMPT_TTL);
+      await this.redis.expire(attemptKey, OtpService.ATTEMPT_TTL);
     }
 
-    if (attempts > this.MAX_ATTEMPTS) {
+    if (attempts > OtpService.MAX_ATTEMPTS) {
       throw new HttpException(
         'Maximum OTP attempts exceeded. Please try again later.',
         HttpStatus.TOO_MANY_REQUESTS
@@ -52,6 +56,38 @@ export class OtpService {
     }
 
     const otp = this.generateOtp();
-    await this.redis.set(otpKey, otp, 'EX', this.OTP_TTL);
+    await this.redis.set(otpKey, otp, 'EX', OtpService.OTP_TTL);
+    const token = signJwt(
+      {
+        identifier: identifier,
+        verified: false,
+      },
+      {
+        expiresIn: OtpService.OTP_TTL,
+      }
+    );
+    return token;
+  }
+
+  async verify(identifier: string, { otp }: VerifyOtpDto) {
+    const otpKey = this.getOtpKey(identifier);
+    const storedOtp = await this.redis.get(otpKey);
+
+    if (!storedOtp || storedOtp !== otp) {
+      throw new BadRequestException('Invalid otp');
+    }
+
+    await this.redis.del(otpKey);
+    const token = signJwt(
+      {
+        identifier: identifier,
+        verified: true,
+      },
+      {
+        expiresIn: 3600 * 24, // 1 day
+      }
+    );
+
+    return token;
   }
 }
