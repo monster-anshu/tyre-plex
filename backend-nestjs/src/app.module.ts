@@ -3,11 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './env';
+import { Order } from './order/order.entity';
+import { OrderModule } from './order/order.module';
 import { OtpModule } from './otp/otp.module';
 import { RedisModule } from './redis/redis.module';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
-import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -23,10 +24,18 @@ import { OrderModule } from './order/order.module';
           port: configuration.SQL.PORT,
           username: configuration.SQL.USERNAME,
         },
-        slaves: [],
+        slaves: [
+          {
+            database: configuration.SQL.DB,
+            host: configuration.SQL.HOST,
+            password: configuration.SQL.PASSWORD,
+            port: configuration.SQL.PORT,
+            username: configuration.SQL.USERNAME,
+          },
+        ],
       },
-      entities: [User],
-      connectTimeout: 30000,
+      entities: [User, Order],
+      connectTimeout: 3000,
       subscribers: [],
       logging: configuration.APPLICATION.ENV != 'production',
     }),

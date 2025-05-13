@@ -22,7 +22,9 @@ export class UserService {
     });
   }
 
-  add(user: Pick<User, 'email'>) {
-    return this.userRepository.insert(user);
+  async add(user: Pick<User, 'email'>) {
+    const data = this.userRepository.create(user);
+    await data.save();
+    return data;
   }
 }

@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import Redis from 'ioredis';
 import { signJwt } from '~/jwt';
@@ -74,6 +73,7 @@ export class OtpService {
   }
 
   async verify(identifier: string, { otp }: VerifyOtpDto) {
+    const attemptKey = this.getAttemptKey(identifier);
     const otpKey = this.getOtpKey(identifier);
     const storedOtp = await this.redis.get(otpKey);
 
@@ -82,16 +82,18 @@ export class OtpService {
     }
 
     await this.redis.del(otpKey);
+    await this.redis.del(attemptKey);
 
-    const user = await this.userService.getByEmail(identifier);
+    let user = await this.userService.getByEmail(identifier);
     if (!user) {
-      await this.userService.add({ email: identifier });
+      user = await this.userService.add({ email: identifier });
     }
 
     const token = signJwt(
       {
         identifier: identifier,
         verified: true,
+        userId: user.id,
       },
       {
         expiresIn: 3600 * 24, // 1 day
