@@ -7,6 +7,7 @@ import { OtpModule } from './otp/otp.module';
 import { RedisModule } from './redis/redis.module';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
     RedisModule,
     OtpModule,
     UserModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
