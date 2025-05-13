@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
+import { ReactQueryProvider } from '~/providers/react-query';
 import './globals.css';
 
 const poppinSans = Poppins({
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppinSans.variable} antialiased`}>{children}</body>
+      <body className={`${poppinSans.variable} antialiased`}>
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+      </body>
     </html>
   );
 }
