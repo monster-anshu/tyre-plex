@@ -20,4 +20,8 @@ export const configuration = {
     PORT: Number(process.env.SQL_PORT),
     USERNAME: process.env.SQL_USERNAME as string,
   },
+  KAFKA: {
+    BROKERS: process.env.KAFKA_BROKERS?.split(',') || [],
+    ORDER_TOPIC: process.env.KAFKA_ORDER_TOPIC as string,
+  },
 };

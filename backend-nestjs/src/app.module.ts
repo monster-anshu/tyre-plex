@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './env';
+import { KafkaModule } from './kafka/kafka.module';
 import { Order } from './order/order.entity';
 import { OrderModule } from './order/order.module';
 import { OtpModule } from './otp/otp.module';
@@ -39,7 +40,6 @@ import { UserModule } from './user/user.module';
       subscribers: [],
       logging: configuration.APPLICATION.ENV != 'production',
     }),
-    RedisModule,
     OtpModule,
     UserModule,
     OrderModule,

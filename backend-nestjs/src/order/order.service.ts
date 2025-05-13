@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { configuration } from '~/env';
+import { KafkaService } from '~/kafka/kafka.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './order.entity';
 
@@ -8,7 +10,8 @@ import { Order } from './order.entity';
 export class OrderService {
   constructor(
     @InjectRepository(Order, 'sql-main')
-    private orderRepository: Repository<Order>
+    private readonly orderRepository: Repository<Order>,
+    private readonly kafkaService: KafkaService
   ) {}
 
   async getById(userId: number, id: number) {
@@ -36,7 +39,21 @@ export class OrderService {
       userId: userId,
     });
     await order.save();
+    await this.emitToKafka(order);
 
     return order;
+  }
+
+  private async emitToKafka(order: Order) {
+    const result = await this.kafkaService.send({
+      messages: [
+        {
+          value: Buffer.from(JSON.stringify(order)),
+          key: order.id.toString(),
+        },
+      ],
+      topic: configuration.KAFKA.ORDER_TOPIC,
+    });
+    return result;
   }
 }
