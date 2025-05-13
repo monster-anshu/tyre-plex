@@ -1,6 +1,23 @@
 import 'dotenv/config';
-export const REDIS_CACHE_HOST = process.env.REDIS_CACHE_HOST as string;
-export const REDIS_CACHE_PORT = +(process.env.REDIS_CACHE_PORT || '');
-export const REDIS_CACHE_USERNAME = process.env.REDIS_CACHE_USERNAME as string;
-export const REDIS_CACHE_PASSWORD = process.env.REDIS_CACHE_PASSWORD as string;
-export const JWT_SECRET = process.env.JWT_SECRET as string;
+
+export const configuration = {
+  APPLICATION: {
+    ENV: process.env.NODE_ENV,
+  },
+  JWT: {
+    SECRET: process.env.JWT_SECRET as string,
+  },
+  REDIS: {
+    HOST: process.env.REDIS_CACHE_HOST as string,
+    PASSWORD: process.env.REDIS_CACHE_PASSWORD as string,
+    PORT: +(process.env.REDIS_CACHE_PORT || ''),
+    USERNAME: process.env.REDIS_CACHE_USERNAME as string,
+  },
+  SQL: {
+    DB: process.env.SQL_DB as string,
+    HOST: process.env.SQL_HOST as string,
+    PASSWORD: process.env.SQL_PASSWORD as string,
+    PORT: Number(process.env.SQL_PORT),
+    USERNAME: process.env.SQL_USERNAME as string,
+  },
+};

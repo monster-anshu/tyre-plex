@@ -9,12 +9,16 @@ import {
 import Redis from 'ioredis';
 import { signJwt } from '~/jwt';
 import { REDIS_PROVIDER_NAME } from '~/redis/redis.module';
+import { UserService } from '~/user/user.service';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Injectable()
 export class OtpService {
-  constructor(@Inject(REDIS_PROVIDER_NAME) private readonly redis: Redis) {}
+  constructor(
+    @Inject(REDIS_PROVIDER_NAME) private readonly redis: Redis,
+    private readonly userService: UserService
+  ) {}
 
   static readonly OTP_TTL = 300;
   static readonly ATTEMPT_TTL = 600;
@@ -78,6 +82,12 @@ export class OtpService {
     }
 
     await this.redis.del(otpKey);
+
+    const user = await this.userService.getByEmail(identifier);
+    if (!user) {
+      await this.userService.add({ email: identifier });
+    }
+
     const token = signJwt(
       {
         identifier: identifier,

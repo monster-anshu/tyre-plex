@@ -1,11 +1,38 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RedisModule } from './redis/redis.module';
+import { configuration } from './env';
 import { OtpModule } from './otp/otp.module';
+import { RedisModule } from './redis/redis.module';
+import { User } from './user/user.entity';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [RedisModule, OtpModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      name: 'sql-main',
+      type: 'mysql',
+      synchronize: true,
+      replication: {
+        master: {
+          database: configuration.SQL.DB,
+          host: configuration.SQL.HOST,
+          password: configuration.SQL.PASSWORD,
+          port: configuration.SQL.PORT,
+          username: configuration.SQL.USERNAME,
+        },
+        slaves: [],
+      },
+      entities: [User],
+      connectTimeout: 30000,
+      subscribers: [],
+      logging: configuration.APPLICATION.ENV != 'production',
+    }),
+    RedisModule,
+    OtpModule,
+    UserModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

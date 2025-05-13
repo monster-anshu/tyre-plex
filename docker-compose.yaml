@@ -49,8 +49,22 @@ services:
     volumes:
       - redis_data:/data
 
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
 volumes:
   mongo_data:
   redis_data:
   zookeeper_data:
   kafka_data:
+  mysql-data:
