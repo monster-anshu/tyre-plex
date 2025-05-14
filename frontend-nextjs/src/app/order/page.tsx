@@ -12,7 +12,6 @@ import {
 } from 'flowbite-react';
 import * as React from 'react';
 import CreateOrder from '~/components/create-order';
-import { withAuth } from '~/hoc/withAuth';
 import { orderQuery } from '~/queries/order.query';
 
 type IOrdePageProps = {};
@@ -65,4 +64,4 @@ const OrdePage: React.FC<IOrdePageProps> = () => {
   );
 };
 
-export default withAuth(OrdePage);
+export default OrdePage;

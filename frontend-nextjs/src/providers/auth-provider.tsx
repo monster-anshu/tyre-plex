@@ -1,24 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
-import { Spinner } from 'flowbite-react';
-import { usePathname } from 'next/navigation';
+'use client';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
-import { userQuery } from '~/queries/user.query';
+import { client } from '~/services/client';
 
 type IAuthProviderProps = {
   children: React.ReactNode;
 };
-const unprotected_routes = ['/login'];
 
 const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
-  const pathname = usePathname();
-  const { data, isLoading } = useQuery({
-    ...userQuery,
-    enabled: !unprotected_routes.includes(pathname),
-  });
+  const router = useRouter();
 
-  if (isLoading) {
-    return <Spinner />;
-  }
+  React.useEffect(() => {
+    client.interceptors.response.use(undefined, async (error) => {
+      if (axios.isAxiosError(error)) {
+        const status = error.status;
+        if (status === 401) {
+          router.push('/login');
+        }
+      }
+    });
+  }, []);
 
   return children;
 };

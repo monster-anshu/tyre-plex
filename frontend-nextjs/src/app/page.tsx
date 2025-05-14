@@ -1,6 +1,5 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { Spinner } from 'flowbite-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -11,11 +10,6 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (axios.isAxiosError(error)) {
-      if (error.status === 401) {
-        router.push('/login');
-      }
-    }
     if (data?.id) {
       router.push('/order');
     }

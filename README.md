@@ -114,3 +114,6 @@ npm run dev
 Access the frontend at:
 
 [http://localhost:3001/login](http://localhost:3001/login)
+
+![order table](./static/order-table.png)
+![order modal](./static/order-modal.png)
