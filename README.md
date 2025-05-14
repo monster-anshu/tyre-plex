@@ -84,6 +84,8 @@ Access the backend API documentation at:
 
 [http://localhost:3000/api/v1/tyre-plex/docs](http://localhost:3000/api/v1/tyre-plex/docs)
 
+![Swagger UI](./static/swagger.png)
+
 ---
 
 ## 💻 Frontend Setup (Next.js)
