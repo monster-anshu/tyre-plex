@@ -4,7 +4,9 @@ import * as React from 'react';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {},
+    queries: {
+      retry: false,
+    },
     mutations: {
       onError(error) {
         alert(error.message);
